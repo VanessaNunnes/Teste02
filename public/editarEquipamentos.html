@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+
+    <title>Editar Equipamento</title>
+</head>
+
+<style>
+    :root {
+        min-width: 300px;
+        margin: auto;
+    }
+
+    body {
+        background-color: #454545;
+    }
+
+    h3 {
+        text-align: center;
+    }
+
+    form {
+        width: 100%;
+        margin: auto;
+        margin-top: 2%;
+    }
+
+    #button1 {
+        width: 100%;
+        margin: auto;
+        margin-top: 4%;
+    }
+
+    .card {
+        width: 45%;
+        margin: auto;
+        margin-top: 5%;
+        padding: 3%;
+    }
+
+    .form-container {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-house"></i></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="cadastroEquipamentos.html" id="navTabela"> Cadastrar
+                            Equipamento </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="tabelaEquipamentos.html" id="navTabela"> Tabela
+                            Equipamentos </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="tabelaChamados.html" id="navTabela"> Tabela
+                            Chamados </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container d-flex justify-content-around">
+
+        <div class="card">
+            <div class="form-container">
+                <h3>Editar Equipamento</h3>
+                <form id="equipamentoForm" method="post" action="/edicoesEquipamentos/:id">
+                    <div class="form-input">
+                        <label for="ID_Equipamento" class="form-label">ID do Equipamento:</label>
+                        <input type="text" id="ID_Equipamento" name="ID_Equipamento" class="form-control" readonly>
+                    </div>
+                    <div class="form-input">
+                        <label for="Nome" class="form-label">Nome do Equipamento:</label>
+                        <input type="text" id="Nome" name="Nome" class="form-control" required minlength="6">
+                    </div>
+                    <div class="form-input">
+                        <label for="Preco_Aquisicao" class="form-label">Preço de Aquisição:</label>
+                        <input type="text" id="Preco_Aquisicao" name="Preco_Aquisicao" class="form-control" required>
+                    </div>
+                    <div class="form-input">
+                        <label for="Numero_Serie" class="form-label">Número de Série:</label>
+                        <input type="text" id="Numero_Serie" name="Numero_Serie" class="form-control" required>
+                    </div>
+                    <div class="form-input">
+                        <label for="Data_Fabricacao" class="form-label">Data de Fabricação:</label>
+                        <input type="date" id="Data_Fabricacao" name="Data_Fabricacao" class="form-control" required>
+                    </div>
+                    <div class="form-input">
+                        <label for="Fabricante" class="form-label">Fabricante:</label>
+                        <input type="text" id="Fabricante" name="Fabricante" class="form-control" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-info" value="Enviar" onclick="salvarAlteracoes()">Salvar
+                        Alterações</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('Data_Fabricacao').setAttribute('max', hoje);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idEquipamento = urlParams.get('idEquipamento');
+            console.log('ID do Equipamento:', idEquipamento);
+
+            window.idEquipamentoGlobal = idEquipamento;
+
+            carregarDetalhesEquipamento(idEquipamento);
+        });
+
+        async function carregarDetalhesEquipamento(idEquipamento) {
+            if (idEquipamento) {
+                try {
+                    const response = await fetch(`/editarEquipamentos/${idEquipamento}`);
+                    const data = await response.json();
+
+                    document.getElementById('ID_Equipamento').value = data.ID_Equipamento;
+                    document.getElementById('Nome').value = data.Nome;
+                    document.getElementById('Preco_Aquisicao').value = data.Preco_Aquisicao;
+                    document.getElementById('Numero_Serie').value = data.Numero_Serie;
+
+                    const dataAbertura = new Date(data.Data_Fabricacao);
+                    const dataFormatada = dataAbertura.toISOString().split('T')[0];
+                    document.getElementById('Data_Fabricacao').value = dataFormatada;
+
+                    document.getElementById('Fabricante').value = data.Fabricante;
+                } catch (error) {
+                    console.error('Erro ao carregar detalhes do equipamento:', error);
+                }
+            } else {
+                console.error('ID do equipamento não fornecido para carregar detalhes.');
+            }
+        }
+
+        async function salvarAlteracoes() {
+            const idEquipamento = window.idEquipamentoGlobal;
+
+            if (idEquipamento) {
+                const ID_Equipamento = document.getElementById('ID_Equipamento').value;
+                const Nome = document.getElementById('Nome').value;
+                const Preco_Aquisicao = document.getElementById('Preco_Aquisicao').value;
+                const Numero_Serie = document.getElementById('Numero_Serie').value;
+                const Data_Fabricacao = document.getElementById('Data_Fabricacao').value;
+                const Fabricante = document.getElementById('Fabricante').value;
+
+                try {
+                    const response = await fetch(`/edicoesEquipamentos/${idEquipamento}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ID_Equipamento,
+                            Nome,
+                            Preco_Aquisicao,
+                            Numero_Serie,
+                            Data_Fabricacao,
+                            Fabricante,
+                        }),
+                    });
+
+                    if (response.ok) {
+                        console.log('Alterações salvas com sucesso!');
+                        window.location.href = '/tabelaEquipamentos.html';
+                    } else {
+                        console.error('Erro ao salvar as alterações:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Erro ao salvar as alterações:', error);
+                }
+            } else {
+                console.error('ID do equipamento não fornecido para salvar alterações.');
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/d1f76562fd.js" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
